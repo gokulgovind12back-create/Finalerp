@@ -1,0 +1,2871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business ERP - AED</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --primary: #0f766e;
+    --primary-dark: #0d5c56;
+    --primary-light: #14b8a6;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --success: #059669;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --info: #2563eb;
+    --sidebar-w: 240px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+  /* Sidebar */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: #e2e8f0;
+    height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+  .sidebar-header {
+    padding: 1.5rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-header .app-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .sidebar-header .app-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 0.4rem;
+    object-fit: contain;
+    background: rgba(255,255,255,0.1);
+    flex-shrink: 0;
+  }
+  .sidebar-header .app-logo-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 0.4rem;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .sidebar-header h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+  .sidebar-header h1 span { color: var(--primary-light); }
+  .company-name-display {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 0.35rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .nav-menu {
+    flex: 1;
+    padding: 1rem 0.75rem;
+    overflow-y: auto;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    border-radius: 0.5rem;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 0.25rem;
+    font-size: 0.925rem;
+    font-weight: 500;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .nav-item.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(15,118,110,0.35);
+  }
+  .nav-item .icon { font-size: 1.15rem; width: 1.4rem; text-align: center; }
+  .sidebar-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+  /* Main */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .topbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0.9rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .topbar h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  .topbar-actions { display: flex; gap: 0.75rem; align-items: center; }
+  .content {
+    padding: 1.5rem 1.75rem;
+    flex: 1;
+  }
+  /* Cards & Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.15rem;
+    margin-bottom: 1.5rem;
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+  .stat-card .label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .stat-card .value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-top: 0.35rem;
+    color: var(--text);
+  }
+  .stat-card .sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+  .stat-card.sales .value { color: var(--success); }
+  .stat-card.receivable .value { color: var(--info); }
+  .stat-card.payable .value { color: var(--warning); }
+  .stat-card.expense .value { color: var(--danger); }
+  /* Cards */
+  .card {
+    background: var(--card);
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 1.5rem;
+  }
+  .card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+  .card-body { padding: 1.25rem; }
+  /* Tables */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  tr:hover td { background: #f8fafc; }
+  tr:last-child td { border-bottom: none; }
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-secondary {
+    background: #e2e8f0;
+    color: var(--text);
+  }
+  .btn-secondary:hover { background: #cbd5e1; }
+  .btn-danger {
+    background: #fef2f2;
+    color: var(--danger);
+  }
+  .btn-danger:hover { background: #fee2e2; }
+  .btn-sm {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { background: #f1f5f9; }
+  /* Forms */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .form-group label {
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.45rem;
+    font-size: 0.9rem;
+    background: #fff;
+    transition: border-color 0.15s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(15,118,110,0.12);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 1rem;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: 0.85rem;
+    width: 100%;
+    max-width: 640px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    animation: modalIn 0.2s ease;
+  }
+  .modal.wide { max-width: 900px; }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.96) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-header {
+    padding: 1.15rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-header h3 { font-size: 1.15rem; font-weight: 700; }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    line-height: 1;
+    padding: 0.2rem;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 1.5rem; }
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+  }
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .badge-success { background: #d1fae5; color: #065f46; }
+  .badge-warning { background: #fef3c7; color: #92400e; }
+  .badge-danger { background: #fee2e2; color: #991b1b; }
+  .badge-info { background: #dbeafe; color: #1e40af; }
+  /* Invoice specific */
+  .invoice-items { margin: 1rem 0; }
+  .invoice-item-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 0.6rem;
+    align-items: end;
+    margin-bottom: 0.6rem;
+  }
+  .invoice-totals {
+    margin-top: 1rem;
+    text-align: right;
+    font-size: 0.95rem;
+  }
+  .invoice-totals div { margin-bottom: 0.3rem; }
+  .invoice-totals .grand {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: 0.4rem;
+  }
+  /* Logo preview */
+  .logo-preview {
+    width: 80px;
+    height: 80px;
+    border: 2px dashed var(--border);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f8fafc;
+  }
+  .logo-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  /* Two column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 900px) {
+    .two-col { grid-template-columns: 1fr; }
+    .sidebar { width: 70px; }
+    .sidebar-header h1 span, .company-name-display, .nav-item span:not(.icon) { display: none; }
+    .main { margin-left: 70px; }
+    .nav-item { justify-content: center; padding: 0.85rem; }
+  }
+  /* Print styles for invoice */
+  @media print {
+    .sidebar, .topbar, .no-print { display: none !important; }
+    .main { margin-left: 0; }
+    .content { padding: 0; }
+    body { background: #fff; }
+  }
+  .page { display: none; }
+  .page.active { display: block; }
+  /* Product search dropdown */
+  .product-search-wrap { position: relative; }
+  .product-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 0.45rem;
+    max-height: 180px;
+    overflow-y: auto;
+    z-index: 20;
+    display: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+  .product-dropdown.show { display: block; }
+  .product-dropdown div {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+  .product-dropdown div:hover { background: #f1f5f9; }
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: #0f172a;
+    color: #fff;
+    padding: 0.85rem 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    z-index: 300;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    max-width: 320px;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+
+  /* Login Screen */
+  .login-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f766e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 1rem;
+  }
+  .login-screen.hidden { display: none; }
+  .login-card {
+    background: #fff;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+  }
+  .login-card h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.25rem;
+    color: #0f172a;
+  }
+  .login-card .subtitle {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 1.75rem;
+  }
+  .login-card .form-group { margin-bottom: 1rem; }
+  .login-error {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 0.65rem 0.9rem;
+    border-radius: 0.45rem;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    display: none;
+  }
+  .login-error.show { display: block; }
+  .login-hint {
+    margin-top: 1.25rem;
+    padding: 0.85rem;
+    background: #f1f5f9;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.5;
+  }
+  .login-hint strong { color: #0f172a; }
+  .user-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #f1f5f9;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .user-badge.owner { background: #ccfbf1; color: #0f766e; }
+  .user-badge.demo { background: #e0e7ff; color: #4338ca; }
+  .demo-banner {
+    background: linear-gradient(90deg, #e0e7ff, #c7d2fe);
+    color: #3730a3;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+    border-bottom: 1px solid #a5b4fc;
+  }
+  .demo-banner.hidden { display: none; }
+</style>
+</head>
+<body>
+  <!-- LOGIN SCREEN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <h1>🔐 ERP Login</h1>
+      <p class="subtitle">Sign in to continue</p>
+      <div class="login-error" id="loginError">Invalid username or password</div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:0.5rem;padding:0.7rem;" onclick="doLogin()">Sign In</button>
+      <div class="login-hint">
+        <strong>Owner:</strong> owner / owner123<br>
+        <strong>Employee:</strong> employee / emp123<br>
+        <strong>Demo (isolated study):</strong> demo / demo123
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="app-brand">
+        <div id="sidebarAppLogo" class="app-logo-placeholder">📦</div>
+        <div>
+          <h1 id="sidebarAppName">ERP <span>Pro</span></h1>
+        </div>
+      </div>
+      <div class="company-name-display" id="sidebarCompanyName">My Company</div>
+    </div>
+    <nav class="nav-menu">
+      <div class="nav-item active" data-page="dashboard"><span class="icon">📊</span><span>Dashboard</span></div>
+      <div class="nav-item" data-page="invoices"><span class="icon">🧾</span><span>Invoices</span></div>
+      <div class="nav-item" data-page="customers"><span class="icon">👥</span><span>Customers</span></div>
+      <div class="nav-item" data-page="products"><span class="icon">📦</span><span>Products</span></div>
+      <div class="nav-item" data-page="suppliers"><span class="icon">🏭</span><span>Suppliers</span></div>
+      <div class="nav-item" data-page="purchases"><span class="icon">🛒</span><span>Purchases</span></div>
+      <div class="nav-item" data-page="expenses"><span class="icon">💸</span><span>Expenses</span></div>
+      <div class="nav-item" data-page="settings"><span class="icon">⚙️</span><span>Settings</span></div>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="margin-bottom:0.5rem;">
+        <span class="user-badge" id="userBadge">—</span>
+      </div>
+      Currency: AED · Tax: <span id="sidebarTax">5</span>%
+      <div style="margin-top:0.6rem;">
+        <button class="btn btn-secondary btn-sm" style="width:100%;font-size:0.75rem;" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="demo-banner hidden" id="demoBanner">
+      📚 Demo Account — Isolated study mode. Your data never mixes with Owner/Employee data. Settings are restricted.
+    </div>
+    <div class="topbar">
+      <h2 id="pageTitle">Dashboard</h2>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" id="createInvoiceBtn" onclick="openInvoiceModal()">+ Create Invoice</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card sales">
+            <div class="label">Total Sales</div>
+            <div class="value" id="statTotalSales">AED 0.00</div>
+            <div class="sub">All time</div>
+          </div>
+          <div class="stat-card receivable">
+            <div class="label">Receivables</div>
+            <div class="value" id="statReceivables">AED 0.00</div>
+            <div class="sub">Unpaid invoices</div>
+          </div>
+          <div class="stat-card payable">
+            <div class="label">Payables</div>
+            <div class="value" id="statPayables">AED 0.00</div>
+            <div class="sub">Unpaid purchases</div>
+          </div>
+          <div class="stat-card expense">
+            <div class="label">Total Expenses</div>
+            <div class="value" id="statExpenses">AED 0.00</div>
+            <div class="sub">All time</div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="label">Today's Sales</div>
+            <div class="value" id="statTodaySales">AED 0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">This Week</div>
+            <div class="value" id="statWeekSales">AED 0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">This Month</div>
+            <div class="value" id="statMonthSales">AED 0.00</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">🏆 Best Selling Products</div>
+            <div class="card-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Product</th><th>Qty Sold</th><th>Revenue</th></tr></thead>
+                  <tbody id="bestSellingBody"><tr><td colspan="3" class="empty-state">No sales yet</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">📉 Least Selling Products</div>
+            <div class="card-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Product</th><th>Qty Sold</th><th>Stock</th></tr></thead>
+                  <tbody id="leastSellingBody"><tr><td colspan="3" class="empty-state">No data</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">Recent Invoices</div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Invoice #</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dashRecentInvoices"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVOICES -->
+      <div class="page" id="page-invoices">
+        <div class="card">
+          <div class="card-header">
+            <span>All Invoices</span>
+            <button class="btn btn-primary btn-sm" onclick="openInvoiceModal()">+ New Invoice</button>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Invoice #</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Subtotal</th>
+                    <th>Tax</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="invoicesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div class="page" id="page-customers">
+        <div class="card">
+          <div class="card-header">
+            <span>Customers</span>
+            <button class="btn btn-primary btn-sm" onclick="openCustomerModal()">+ Add Customer</button>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="customersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="page" id="page-products">
+        <div class="card">
+          <div class="card-header">
+            <span>Products / Stock</span>
+            <button class="btn btn-primary btn-sm" onclick="openProductModal()">+ Add Product</button>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Cost (AED)</th>
+                    <th>Price (AED)</th>
+                    <th>Stock</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="productsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUPPLIERS -->
+      <div class="page" id="page-suppliers">
+        <div class="card">
+          <div class="card-header">
+            <span>Suppliers</span>
+            <button class="btn btn-primary btn-sm" onclick="openSupplierModal()">+ Add Supplier</button>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="suppliersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PURCHASES -->
+      <div class="page" id="page-purchases">
+        <div class="card">
+          <div class="card-header">
+            <span>Purchases</span>
+            <button class="btn btn-primary btn-sm" onclick="openPurchaseModal()">+ New Purchase</button>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Purchase #</th>
+                    <th>Supplier</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="purchasesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPENSES -->
+      <div class="page" id="page-expenses">
+        <div class="card">
+          <div class="card-header">
+            <span>Expenses</span>
+            <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">+ Add Expense</button>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount (AED)</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="expensesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <form id="settingsForm" onsubmit="saveSettings(event)">
+          <div class="card">
+            <div class="card-header">Software Branding</div>
+            <div class="card-body">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>ERP Software Name</label>
+                  <input type="text" id="setAppName" placeholder="e.g. ERP Pro, MyBiz, Acme ERP">
+                </div>
+                <div class="form-group">
+                  <label>Software Logo (sidebar)</label>
+                  <input type="file" id="setAppLogo" accept="image/*" onchange="previewAppLogo(event)">
+                  <div class="logo-preview" id="appLogoPreview" style="margin-top:0.5rem;">
+                    <span style="font-size:0.75rem;color:#94a3b8;">No logo</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Company Settings</div>
+            <div class="card-body">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Company Name *</label>
+                  <input type="text" id="setCompanyName" required>
+                </div>
+                <div class="form-group">
+                  <label>Tax Number (TRN) *</label>
+                  <input type="text" id="setTaxNumber" required>
+                </div>
+                <div class="form-group">
+                  <label>Licence Number *</label>
+                  <input type="text" id="setLicenceNumber" required>
+                </div>
+                <div class="form-group">
+                  <label>Mobile Number *</label>
+                  <input type="text" id="setMobile" required>
+                </div>
+                <div class="form-group">
+                  <label>Email *</label>
+                  <input type="email" id="setEmail" required>
+                </div>
+                <div class="form-group">
+                  <label>Default Tax % *</label>
+                  <input type="number" id="setTaxPercent" min="0" max="100" step="0.01" value="5" required>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label>Company Address *</label>
+                  <textarea id="setAddress" required></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Company Logo (on invoices)</label>
+                  <input type="file" id="setLogo" accept="image/*" onchange="previewLogo(event)">
+                  <div class="logo-preview" id="logoPreview" style="margin-top:0.5rem;">
+                    <span style="font-size:0.75rem;color:#94a3b8;">No logo</span>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top:1.5rem;">
+                <button type="submit" class="btn btn-primary">Save All Settings</button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Account Security (Owner only) -->
+        <div class="card" id="accountSecurityCard">
+          <div class="card-header">🔐 Account Security (Owner)</div>
+          <div class="card-body">
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">
+              Manage login credentials. Owner and Employee share the same business data. Demo is completely isolated.
+            </p>
+            <h4 style="font-size:0.9rem;margin-bottom:0.75rem;">Owner Account</h4>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Owner Username</label>
+                <input type="text" id="setOwnerUsername" placeholder="owner">
+              </div>
+              <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="setOwnerPassword" placeholder="Leave blank to keep current">
+              </div>
+              <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="setOwnerPassword2" placeholder="Confirm new password">
+              </div>
+            </div>
+            <h4 style="font-size:0.9rem;margin:1.25rem 0 0.75rem;">Employee Account</h4>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Employee Username</label>
+                <input type="text" id="setEmployeeUsername" placeholder="employee">
+              </div>
+              <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="setEmployeePassword" placeholder="Leave blank to keep current">
+              </div>
+              <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="setEmployeePassword2" placeholder="Confirm new password">
+              </div>
+            </div>
+            <div style="margin-top:1rem;">
+              <button type="button" class="btn btn-primary" onclick="saveOwnerCredentials()">Update Credentials</button>
+            </div>
+            <div style="margin-top:1.25rem;padding:0.85rem;background:#f8fafc;border-radius:0.5rem;font-size:0.8rem;color:var(--text-muted);">
+              <strong>Demo Account (fixed & isolated):</strong> username <code>demo</code> · password <code>demo123</code><br>
+              Demo data is stored separately and never mixes with Owner/Employee data. Demo cannot access Settings.
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="card" id="dangerZoneCard" style="border-color:#fecaca;">
+          <div class="card-header" style="color:var(--danger);">⚠️ Danger Zone</div>
+          <div class="card-body">
+            <p style="font-size:0.9rem;margin-bottom:1rem;color:var(--text-muted);">
+              Completely reset the <strong>real business data</strong> (Owner + Employee). This permanently deletes all invoices, customers, products, suppliers, purchases, expenses and company settings. <strong>Demo data is not affected.</strong> This action cannot be undone.
+            </p>
+            <button type="button" class="btn btn-danger" onclick="resetEntireERP()">🗑️ Reset Real ERP Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Invoice Modal -->
+  <div class="modal-overlay" id="invoiceModal">
+    <div class="modal wide">
+      <div class="modal-header">
+        <h3 id="invoiceModalTitle">Create Invoice</h3>
+        <button class="modal-close" onclick="closeModal('invoiceModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="invoiceEditId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Customer Name *</label>
+            <input type="text" id="invCustomerName" list="customerList" required placeholder="Type or select customer">
+            <datalist id="customerList"></datalist>
+          </div>
+          <div class="form-group">
+            <label>Customer Mobile</label>
+            <input type="text" id="invCustomerMobile">
+          </div>
+          <div class="form-group">
+            <label>Customer Email</label>
+            <input type="email" id="invCustomerEmail">
+          </div>
+          <div class="form-group">
+            <label>Customer Address</label>
+            <input type="text" id="invCustomerAddress">
+          </div>
+          <div class="form-group">
+            <label>Invoice Date *</label>
+            <input type="date" id="invDate" required>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="invStatus">
+              <option value="unpaid">Unpaid</option>
+              <option value="paid">Paid</option>
+              <option value="partial">Partial</option>
+            </select>
+          </div>
+        </div>
+
+        <h4 style="margin:1.25rem 0 0.75rem;font-size:0.95rem;">Items</h4>
+        <div id="invoiceItems"></div>
+        <button type="button" class="btn btn-secondary btn-sm" style="margin-top:0.5rem;" onclick="addInvoiceItemRow()">+ Add Item</button>
+
+        <div class="invoice-totals">
+          <div>Subtotal: <strong id="invSubtotal">AED 0.00</strong></div>
+          <div>Tax (<span id="invTaxLabel">5</span>%): <strong id="invTaxAmount">AED 0.00</strong></div>
+          <div class="grand">Grand Total: <span id="invGrandTotal">AED 0.00</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('invoiceModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Modal -->
+  <div class="modal-overlay" id="customerModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="customerModalTitle">Add Customer</h3>
+        <button class="modal-close" onclick="closeModal('customerModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="customerEditId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Name *</label>
+            <input type="text" id="custName" required>
+          </div>
+          <div class="form-group">
+            <label>Mobile</label>
+            <input type="text" id="custMobile">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="custEmail">
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label>Address</label>
+            <textarea id="custAddress"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('customerModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCustomer()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="productModalTitle">Add Product</h3>
+        <button class="modal-close" onclick="closeModal('productModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="productEditId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input type="text" id="prodName" required>
+          </div>
+          <div class="form-group">
+            <label>SKU / Code</label>
+            <input type="text" id="prodSku">
+          </div>
+          <div class="form-group">
+            <label>Cost Price (AED)</label>
+            <input type="number" id="prodCost" min="0" step="0.01" value="0">
+          </div>
+          <div class="form-group">
+            <label>Selling Price (AED) *</label>
+            <input type="number" id="prodPrice" min="0" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Stock Quantity</label>
+            <input type="number" id="prodStock" min="0" step="1" value="0">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('productModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProduct()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplier Modal -->
+  <div class="modal-overlay" id="supplierModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="supplierModalTitle">Add Supplier</h3>
+        <button class="modal-close" onclick="closeModal('supplierModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="supplierEditId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Name *</label>
+            <input type="text" id="supName" required>
+          </div>
+          <div class="form-group">
+            <label>Mobile</label>
+            <input type="text" id="supMobile">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="supEmail">
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label>Address</label>
+            <textarea id="supAddress"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('supplierModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSupplier()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Purchase Modal -->
+  <div class="modal-overlay" id="purchaseModal">
+    <div class="modal wide">
+      <div class="modal-header">
+        <h3>New Purchase</h3>
+        <button class="modal-close" onclick="closeModal('purchaseModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Supplier *</label>
+            <select id="purSupplier" required>
+              <option value="">Select supplier</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date *</label>
+            <input type="date" id="purDate" required>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="purStatus">
+              <option value="unpaid">Unpaid</option>
+              <option value="paid">Paid</option>
+            </select>
+          </div>
+        </div>
+        <h4 style="margin:1.25rem 0 0.75rem;font-size:0.95rem;">Items (will update stock)</h4>
+        <div id="purchaseItems"></div>
+        <button type="button" class="btn btn-secondary btn-sm" style="margin-top:0.5rem;" onclick="addPurchaseItemRow()">+ Add Item</button>
+        <div class="invoice-totals">
+          <div class="grand">Total: <span id="purTotal">AED 0.00</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('purchaseModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePurchase()">Save Purchase</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expense Modal -->
+  <div class="modal-overlay" id="expenseModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add Expense</h3>
+        <button class="modal-close" onclick="closeModal('expenseModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date *</label>
+            <input type="date" id="expDate" required>
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="expCategory" required>
+              <option value="Fuel">Fuel</option>
+              <option value="Food">Food</option>
+              <option value="Rent">Rent</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Salaries">Salaries</option>
+              <option value="Transport">Transport</option>
+              <option value="Office">Office Supplies</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount (AED) *</label>
+            <input type="number" id="expAmount" min="0" step="0.01" required>
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label>Description</label>
+            <input type="text" id="expDesc">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('expenseModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveExpense()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Invoice Modal (Printable) -->
+  <div class="modal-overlay" id="viewInvoiceModal">
+    <div class="modal wide">
+      <div class="modal-header no-print">
+        <h3>Invoice Preview</h3>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="printInvoice()">🖨️ Print</button>
+          <button class="btn btn-secondary btn-sm" onclick="downloadInvoicePDF()">📄 Download PDF</button>
+          <button class="btn btn-primary btn-sm" onclick="shareInvoiceWhatsApp()" style="background:#25D366;">
+            💬 Share via WhatsApp
+          </button>
+          <button class="modal-close" onclick="closeModal('viewInvoiceModal')">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body" id="invoicePreviewContent"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+// ==================== DATA LAYER ====================
+// Owner + Employee share the same data (prefix "erp_").
+// Demo uses a completely isolated store (prefix "erp_demo_").
+// Auth credentials are always stored under the real prefix.
+
+function getDataPrefix() {
+  const u = getCurrentUser();
+  return (u && u.role === 'demo') ? 'erp_demo_' : 'erp_';
+}
+
+const DB = {
+  get(key, def = []) {
+    try {
+      const v = localStorage.getItem(getDataPrefix() + key);
+      return v ? JSON.parse(v) : def;
+    } catch { return def; }
+  },
+  set(key, val) {
+    localStorage.setItem(getDataPrefix() + key, JSON.stringify(val));
+  },
+  // Always read/write auth from the real (non-demo) store
+  getAuthStore(def) {
+    try {
+      const v = localStorage.getItem('erp_auth');
+      return v ? JSON.parse(v) : def;
+    } catch { return def; }
+  },
+  setAuthStore(val) {
+    localStorage.setItem('erp_auth', JSON.stringify(val));
+  }
+};
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function formatMoney(n) {
+  return 'AED ' + (Number(n) || 0).toFixed(2);
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getSettings() {
+  return DB.get('settings', {
+    appName: 'ERP Pro',
+    appLogo: '',
+    companyName: 'My Company',
+    taxNumber: '',
+    licenceNumber: '',
+    mobile: '',
+    email: '',
+    address: '',
+    taxPercent: 5,
+    logo: ''
+  });
+}
+
+// ==================== AUTH ====================
+const AUTH_KEY = 'erp_session';
+
+function getAuth() {
+  const defaults = {
+    ownerUsername: 'owner',
+    ownerPassword: 'owner123',
+    employeeUsername: 'employee',
+    employeePassword: 'emp123',
+    demoUsername: 'demo',
+    demoPassword: 'demo123'
+  };
+  const stored = DB.getAuthStore(null);
+  if (!stored) {
+    DB.setAuthStore(defaults);
+    return { ...defaults };
+  }
+  return {
+    ownerUsername: stored.ownerUsername || 'owner',
+    ownerPassword: stored.ownerPassword || 'owner123',
+    employeeUsername: stored.employeeUsername || 'employee',
+    employeePassword: stored.employeePassword || 'emp123',
+    demoUsername: 'demo',
+    demoPassword: 'demo123'
+  };
+}
+
+function getCurrentUser() {
+  try {
+    const s = sessionStorage.getItem(AUTH_KEY);
+    return s ? JSON.parse(s) : null;
+  } catch { return null; }
+}
+
+function setCurrentUser(user) {
+  if (user) sessionStorage.setItem(AUTH_KEY, JSON.stringify(user));
+  else sessionStorage.removeItem(AUTH_KEY);
+}
+
+function isOwner() {
+  const u = getCurrentUser();
+  return u && u.role === 'owner';
+}
+
+function isEmployee() {
+  const u = getCurrentUser();
+  return u && u.role === 'employee';
+}
+
+function isDemo() {
+  const u = getCurrentUser();
+  return u && u.role === 'demo';
+}
+
+function isLoggedIn() {
+  return !!getCurrentUser();
+}
+
+function doLogin() {
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.classList.remove('show');
+
+  if (!username || !password) {
+    errEl.textContent = 'Please enter username and password';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const auth = getAuth();
+  let user = null;
+
+  if (username === auth.ownerUsername && password === auth.ownerPassword) {
+    user = { username: auth.ownerUsername, role: 'owner' };
+  } else if (username === auth.employeeUsername && password === auth.employeePassword) {
+    user = { username: auth.employeeUsername, role: 'employee' };
+  } else if (username === auth.demoUsername && password === auth.demoPassword) {
+    user = { username: auth.demoUsername, role: 'demo' };
+  }
+
+  if (!user) {
+    errEl.textContent = 'Invalid username or password';
+    errEl.classList.add('show');
+    return;
+  }
+
+  setCurrentUser(user);
+  document.getElementById('loginScreen').classList.add('hidden');
+  applyUserUI();
+  updateSidebar();
+  // Refresh all pages so data comes from the correct store
+  renderDashboard();
+  renderInvoices();
+  renderCustomers();
+  renderProducts();
+  renderSuppliers();
+  renderPurchases();
+  renderExpenses();
+  toast('Welcome, ' + user.username + ' (' + user.role + ')!', 'success');
+}
+
+function doLogout() {
+  setCurrentUser(null);
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').classList.remove('show');
+  document.getElementById('demoBanner').classList.add('hidden');
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.querySelector('.nav-item[data-page="dashboard"]')?.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-dashboard').classList.add('active');
+  document.getElementById('pageTitle').textContent = 'Dashboard';
+  // Hide settings nav for safety until next login
+  const settingsNav = document.querySelector('.nav-item[data-page="settings"]');
+  if (settingsNav) settingsNav.style.display = '';
+}
+
+function applyUserUI() {
+  const user = getCurrentUser();
+  const badge = document.getElementById('userBadge');
+  const demoBanner = document.getElementById('demoBanner');
+  const accountCard = document.getElementById('accountSecurityCard');
+  const dangerCard = document.getElementById('dangerZoneCard');
+  const settingsNav = document.querySelector('.nav-item[data-page="settings"]');
+  const settingsForm = document.getElementById('settingsForm');
+
+  if (!user) return;
+
+  if (user.role === 'owner') {
+    badge.textContent = '👑 Owner';
+    badge.className = 'user-badge owner';
+    demoBanner.classList.add('hidden');
+    if (accountCard) accountCard.style.display = '';
+    if (dangerCard) dangerCard.style.display = '';
+    if (settingsNav) settingsNav.style.display = '';
+    if (settingsForm) {
+      settingsForm.querySelectorAll('input, textarea, select, button').forEach(el => {
+        if (el.type !== 'hidden') el.disabled = false;
+      });
+    }
+  } else if (user.role === 'employee') {
+    badge.textContent = '👷 Employee';
+    badge.className = 'user-badge';
+    badge.style.background = '#fef3c7';
+    badge.style.color = '#92400e';
+    demoBanner.classList.add('hidden');
+    // Employee: hide settings entirely
+    if (settingsNav) settingsNav.style.display = 'none';
+    if (accountCard) accountCard.style.display = 'none';
+    if (dangerCard) dangerCard.style.display = 'none';
+    // If currently on settings page, switch to dashboard
+    if (document.getElementById('page-settings')?.classList.contains('active')) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelector('.nav-item[data-page="dashboard"]')?.classList.add('active');
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-dashboard').classList.add('active');
+      document.getElementById('pageTitle').textContent = 'Dashboard';
+    }
+  } else {
+    // Demo
+    badge.textContent = '📚 Demo';
+    badge.className = 'user-badge demo';
+    demoBanner.classList.remove('hidden');
+    if (accountCard) accountCard.style.display = 'none';
+    if (dangerCard) dangerCard.style.display = 'none';
+    if (settingsNav) settingsNav.style.display = 'none';
+    if (document.getElementById('page-settings')?.classList.contains('active')) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelector('.nav-item[data-page="dashboard"]')?.classList.add('active');
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-dashboard').classList.add('active');
+      document.getElementById('pageTitle').textContent = 'Dashboard';
+    }
+  }
+}
+
+function saveOwnerCredentials() {
+  if (!isOwner()) {
+    toast('Only the owner can change credentials', 'error');
+    return;
+  }
+  const username = document.getElementById('setOwnerUsername').value.trim();
+  const pass1 = document.getElementById('setOwnerPassword').value;
+  const pass2 = document.getElementById('setOwnerPassword2').value;
+  const empUser = document.getElementById('setEmployeeUsername')?.value.trim();
+  const empPass1 = document.getElementById('setEmployeePassword')?.value;
+  const empPass2 = document.getElementById('setEmployeePassword2')?.value;
+
+  if (!username) {
+    toast('Owner username cannot be empty', 'error');
+    return;
+  }
+  const reserved = ['demo'];
+  if (reserved.includes(username.toLowerCase())) {
+    toast('That username is reserved', 'error');
+    return;
+  }
+
+  const auth = getAuth();
+  auth.ownerUsername = username;
+
+  if (pass1 || pass2) {
+    if (pass1 !== pass2) {
+      toast('Owner passwords do not match', 'error');
+      return;
+    }
+    if (pass1.length < 4) {
+      toast('Password must be at least 4 characters', 'error');
+      return;
+    }
+    auth.ownerPassword = pass1;
+  }
+
+  // Employee credentials (optional update)
+  if (empUser) {
+    if (reserved.includes(empUser.toLowerCase()) || empUser.toLowerCase() === username.toLowerCase()) {
+      toast('Employee username is reserved or conflicts with owner', 'error');
+      return;
+    }
+    auth.employeeUsername = empUser;
+  }
+  if (empPass1 || empPass2) {
+    if (empPass1 !== empPass2) {
+      toast('Employee passwords do not match', 'error');
+      return;
+    }
+    if (empPass1.length < 4) {
+      toast('Employee password must be at least 4 characters', 'error');
+      return;
+    }
+    auth.employeePassword = empPass1;
+  }
+
+  DB.setAuthStore(auth);
+
+  const cur = getCurrentUser();
+  if (cur && cur.role === 'owner') {
+    cur.username = username;
+    setCurrentUser(cur);
+  }
+
+  document.getElementById('setOwnerPassword').value = '';
+  document.getElementById('setOwnerPassword2').value = '';
+  if (document.getElementById('setEmployeePassword')) document.getElementById('setEmployeePassword').value = '';
+  if (document.getElementById('setEmployeePassword2')) document.getElementById('setEmployeePassword2').value = '';
+  toast('Credentials updated successfully', 'success');
+}
+
+function resetEntireERP() {
+  if (!isOwner()) {
+    toast('Only the owner can reset the ERP', 'error');
+    return;
+  }
+  const ok = confirm(
+    '⚠️ RESET REAL ERP DATA?\n\nThis will permanently delete ALL Owner/Employee data:\n• Invoices, Customers, Products\n• Suppliers, Purchases, Expenses\n• Company settings\n\nDemo data is NOT affected.\nAuth credentials will be reset to defaults.\n\nThis cannot be undone. Continue?'
+  );
+  if (!ok) return;
+
+  const ok2 = confirm('Are you absolutely sure? Click OK to wipe all real business data.');
+  if (!ok2) return;
+
+  // Clear only real (non-demo) erp_ keys
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('erp_') && !k.startsWith('erp_demo_')) {
+      keysToRemove.push(k);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+
+  getAuth(); // re-write default auth
+  updateSidebar();
+  renderDashboard();
+  renderInvoices();
+  renderCustomers();
+  renderProducts();
+  renderSuppliers();
+  renderPurchases();
+  renderExpenses();
+  loadSettingsForm();
+
+  toast('Real ERP data has been completely reset', 'success');
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ==================== NAVIGATION ====================
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    const page = item.dataset.page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    const titles = {
+      dashboard: 'Dashboard',
+      invoices: 'Invoices',
+      customers: 'Customers',
+      products: 'Products',
+      suppliers: 'Suppliers',
+      purchases: 'Purchases',
+      expenses: 'Expenses',
+      settings: 'Settings'
+    };
+    document.getElementById('pageTitle').textContent = titles[page] || page;
+    // Show create invoice only on relevant pages
+    const btn = document.getElementById('createInvoiceBtn');
+    btn.style.display = (page === 'dashboard' || page === 'invoices' || page === 'customers') ? 'inline-flex' : 'none';
+    refreshPage(page);
+  });
+});
+
+function refreshPage(page) {
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'invoices') renderInvoices();
+  if (page === 'customers') renderCustomers();
+  if (page === 'products') renderProducts();
+  if (page === 'suppliers') renderSuppliers();
+  if (page === 'purchases') renderPurchases();
+  if (page === 'expenses') renderExpenses();
+  if (page === 'settings') loadSettingsForm();
+}
+
+// ==================== SETTINGS ====================
+function loadSettingsForm() {
+  const s = getSettings();
+  document.getElementById('setAppName').value = s.appName || 'ERP Pro';
+  document.getElementById('setCompanyName').value = s.companyName || '';
+  document.getElementById('setTaxNumber').value = s.taxNumber || '';
+  document.getElementById('setLicenceNumber').value = s.licenceNumber || '';
+  document.getElementById('setMobile').value = s.mobile || '';
+  document.getElementById('setEmail').value = s.email || '';
+  document.getElementById('setTaxPercent').value = s.taxPercent ?? 5;
+  document.getElementById('setAddress').value = s.address || '';
+
+  const logoPreview = document.getElementById('logoPreview');
+  if (s.logo) {
+    logoPreview.innerHTML = `<img src="${s.logo}" alt="Logo">`;
+  } else {
+    logoPreview.innerHTML = '<span style="font-size:0.75rem;color:#94a3b8;">No logo</span>';
+  }
+
+  const appLogoPreview = document.getElementById('appLogoPreview');
+  if (s.appLogo) {
+    appLogoPreview.innerHTML = `<img src="${s.appLogo}" alt="App Logo">`;
+  } else {
+    appLogoPreview.innerHTML = '<span style="font-size:0.75rem;color:#94a3b8;">No logo</span>';
+  }
+
+  // Credentials fields (owner only sees these)
+  const auth = getAuth();
+  const userEl = document.getElementById('setOwnerUsername');
+  if (userEl) userEl.value = auth.ownerUsername || 'owner';
+  const p1 = document.getElementById('setOwnerPassword');
+  const p2 = document.getElementById('setOwnerPassword2');
+  if (p1) p1.value = '';
+  if (p2) p2.value = '';
+  const empEl = document.getElementById('setEmployeeUsername');
+  if (empEl) empEl.value = auth.employeeUsername || 'employee';
+  const ep1 = document.getElementById('setEmployeePassword');
+  const ep2 = document.getElementById('setEmployeePassword2');
+  if (ep1) ep1.value = '';
+  if (ep2) ep2.value = '';
+
+  applyUserUI();
+  updateSidebar();
+}
+
+function previewLogo(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('logoPreview').innerHTML = `<img src="${ev.target.result}" alt="Logo">`;
+    window._pendingLogo = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewAppLogo(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('appLogoPreview').innerHTML = `<img src="${ev.target.result}" alt="App Logo">`;
+    window._pendingAppLogo = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveSettings(e) {
+  e.preventDefault();
+  if (!isOwner()) {
+    toast('Only the Owner can change company settings.', 'error');
+    return;
+  }
+  const s = getSettings();
+  s.appName = document.getElementById('setAppName').value.trim() || 'ERP Pro';
+  s.companyName = document.getElementById('setCompanyName').value.trim();
+  s.taxNumber = document.getElementById('setTaxNumber').value.trim();
+  s.licenceNumber = document.getElementById('setLicenceNumber').value.trim();
+  s.mobile = document.getElementById('setMobile').value.trim();
+  s.email = document.getElementById('setEmail').value.trim();
+  s.taxPercent = parseFloat(document.getElementById('setTaxPercent').value) || 5;
+  s.address = document.getElementById('setAddress').value.trim();
+  if (window._pendingLogo) {
+    s.logo = window._pendingLogo;
+    window._pendingLogo = null;
+  }
+  if (window._pendingAppLogo) {
+    s.appLogo = window._pendingAppLogo;
+    window._pendingAppLogo = null;
+  }
+  DB.set('settings', s);
+  updateSidebar();
+  document.title = (s.appName || 'ERP') + ' - AED';
+  toast('Settings saved successfully', 'success');
+}
+
+function updateSidebar() {
+  const s = getSettings();
+  document.getElementById('sidebarCompanyName').textContent = s.companyName || 'My Company';
+  document.getElementById('sidebarTax').textContent = s.taxPercent ?? 5;
+
+  // App name
+  const nameEl = document.getElementById('sidebarAppName');
+  const appName = s.appName || 'ERP Pro';
+  // Highlight last word if multi-word
+  const parts = appName.trim().split(/\s+/);
+  if (parts.length > 1) {
+    const last = parts.pop();
+    nameEl.innerHTML = esc(parts.join(' ')) + ' <span>' + esc(last) + '</span>';
+  } else {
+    nameEl.innerHTML = esc(appName);
+  }
+
+  // App logo
+  const logoWrap = document.getElementById('sidebarAppLogo');
+  if (s.appLogo) {
+    logoWrap.outerHTML = `<img src="${s.appLogo}" alt="Logo" class="app-logo" id="sidebarAppLogo">`;
+  } else {
+    if (logoWrap.tagName === 'IMG') {
+      logoWrap.outerHTML = `<div id="sidebarAppLogo" class="app-logo-placeholder">📦</div>`;
+    }
+  }
+
+  document.title = (s.appName || 'ERP') + ' - AED';
+}
+
+// ==================== CUSTOMERS ====================
+function renderCustomers() {
+  const list = DB.get('customers');
+  const tbody = document.getElementById('customersTableBody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No customers yet. Add one or create an invoice.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(c => `
+    <tr>
+      <td><strong>${esc(c.name)}</strong></td>
+      <td>${esc(c.mobile || '-')}</td>
+      <td>${esc(c.email || '-')}</td>
+      <td>${esc(c.address || '-')}</td>
+      <td>
+        <button class="btn btn-secondary btn-sm" onclick="editCustomer('${c.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openCustomerModal(id = null) {
+  document.getElementById('customerEditId').value = id || '';
+  document.getElementById('customerModalTitle').textContent = id ? 'Edit Customer' : 'Add Customer';
+  if (id) {
+    const c = DB.get('customers').find(x => x.id === id);
+    if (c) {
+      document.getElementById('custName').value = c.name;
+      document.getElementById('custMobile').value = c.mobile || '';
+      document.getElementById('custEmail').value = c.email || '';
+      document.getElementById('custAddress').value = c.address || '';
+    }
+  } else {
+    document.getElementById('custName').value = '';
+    document.getElementById('custMobile').value = '';
+    document.getElementById('custEmail').value = '';
+    document.getElementById('custAddress').value = '';
+  }
+  openModal('customerModal');
+}
+
+function saveCustomer() {
+  const name = document.getElementById('custName').value.trim();
+  if (!name) { toast('Name is required', 'error'); return; }
+  const id = document.getElementById('customerEditId').value;
+  let list = DB.get('customers');
+  const data = {
+    id: id || uid(),
+    name,
+    mobile: document.getElementById('custMobile').value.trim(),
+    email: document.getElementById('custEmail').value.trim(),
+    address: document.getElementById('custAddress').value.trim()
+  };
+  if (id) {
+    list = list.map(c => c.id === id ? data : c);
+  } else {
+    list.push(data);
+  }
+  DB.set('customers', list);
+  closeModal('customerModal');
+  renderCustomers();
+  toast('Customer saved', 'success');
+}
+
+function editCustomer(id) { openCustomerModal(id); }
+
+function deleteCustomer(id) {
+  if (!confirm('Delete this customer?')) return;
+  DB.set('customers', DB.get('customers').filter(c => c.id !== id));
+  renderCustomers();
+  toast('Customer deleted');
+}
+
+function ensureCustomer(name, mobile, email, address) {
+  if (!name) return;
+  let list = DB.get('customers');
+  const existing = list.find(c => c.name.toLowerCase() === name.toLowerCase());
+  if (existing) {
+    // update details if provided
+    if (mobile) existing.mobile = mobile;
+    if (email) existing.email = email;
+    if (address) existing.address = address;
+    list = list.map(c => c.id === existing.id ? existing : c);
+  } else {
+    list.push({ id: uid(), name, mobile: mobile || '', email: email || '', address: address || '' });
+  }
+  DB.set('customers', list);
+}
+
+// ==================== PRODUCTS ====================
+function renderProducts() {
+  const list = DB.get('products');
+  const tbody = document.getElementById('productsTableBody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No products. Add products manually or via purchases.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(p => `
+    <tr>
+      <td><strong>${esc(p.name)}</strong></td>
+      <td>${esc(p.sku || '-')}</td>
+      <td>${formatMoney(p.cost)}</td>
+      <td>${formatMoney(p.price)}</td>
+      <td><span class="badge ${p.stock <= 5 ? 'badge-danger' : 'badge-success'}">${p.stock}</span></td>
+      <td>
+        <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openProductModal(id = null) {
+  document.getElementById('productEditId').value = id || '';
+  document.getElementById('productModalTitle').textContent = id ? 'Edit Product' : 'Add Product';
+  if (id) {
+    const p = DB.get('products').find(x => x.id === id);
+    if (p) {
+      document.getElementById('prodName').value = p.name;
+      document.getElementById('prodSku').value = p.sku || '';
+      document.getElementById('prodCost').value = p.cost ?? 0;
+      document.getElementById('prodPrice').value = p.price ?? 0;
+      document.getElementById('prodStock').value = p.stock ?? 0;
+    }
+  } else {
+    document.getElementById('prodName').value = '';
+    document.getElementById('prodSku').value = '';
+    document.getElementById('prodCost').value = 0;
+    document.getElementById('prodPrice').value = '';
+    document.getElementById('prodStock').value = 0;
+  }
+  openModal('productModal');
+}
+
+function saveProduct() {
+  const name = document.getElementById('prodName').value.trim();
+  const price = parseFloat(document.getElementById('prodPrice').value);
+  if (!name || isNaN(price)) { toast('Name and price required', 'error'); return; }
+  const id = document.getElementById('productEditId').value;
+  let list = DB.get('products');
+  const data = {
+    id: id || uid(),
+    name,
+    sku: document.getElementById('prodSku').value.trim(),
+    cost: parseFloat(document.getElementById('prodCost').value) || 0,
+    price,
+    stock: parseInt(document.getElementById('prodStock').value) || 0
+  };
+  if (id) {
+    list = list.map(p => p.id === id ? data : p);
+  } else {
+    list.push(data);
+  }
+  DB.set('products', list);
+  closeModal('productModal');
+  renderProducts();
+  toast('Product saved', 'success');
+}
+
+function editProduct(id) { openProductModal(id); }
+
+function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  DB.set('products', DB.get('products').filter(p => p.id !== id));
+  renderProducts();
+  toast('Product deleted');
+}
+
+// ==================== SUPPLIERS ====================
+function renderSuppliers() {
+  const list = DB.get('suppliers');
+  const tbody = document.getElementById('suppliersTableBody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No suppliers yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(s => `
+    <tr>
+      <td><strong>${esc(s.name)}</strong></td>
+      <td>${esc(s.mobile || '-')}</td>
+      <td>${esc(s.email || '-')}</td>
+      <td>${esc(s.address || '-')}</td>
+      <td>
+        <button class="btn btn-secondary btn-sm" onclick="editSupplier('${s.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSupplier('${s.id}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openSupplierModal(id = null) {
+  document.getElementById('supplierEditId').value = id || '';
+  document.getElementById('supplierModalTitle').textContent = id ? 'Edit Supplier' : 'Add Supplier';
+  if (id) {
+    const s = DB.get('suppliers').find(x => x.id === id);
+    if (s) {
+      document.getElementById('supName').value = s.name;
+      document.getElementById('supMobile').value = s.mobile || '';
+      document.getElementById('supEmail').value = s.email || '';
+      document.getElementById('supAddress').value = s.address || '';
+    }
+  } else {
+    document.getElementById('supName').value = '';
+    document.getElementById('supMobile').value = '';
+    document.getElementById('supEmail').value = '';
+    document.getElementById('supAddress').value = '';
+  }
+  openModal('supplierModal');
+}
+
+function saveSupplier() {
+  const name = document.getElementById('supName').value.trim();
+  if (!name) { toast('Name is required', 'error'); return; }
+  const id = document.getElementById('supplierEditId').value;
+  let list = DB.get('suppliers');
+  const data = {
+    id: id || uid(),
+    name,
+    mobile: document.getElementById('supMobile').value.trim(),
+    email: document.getElementById('supEmail').value.trim(),
+    address: document.getElementById('supAddress').value.trim()
+  };
+  if (id) {
+    list = list.map(s => s.id === id ? data : s);
+  } else {
+    list.push(data);
+  }
+  DB.set('suppliers', list);
+  closeModal('supplierModal');
+  renderSuppliers();
+  toast('Supplier saved', 'success');
+}
+
+function editSupplier(id) { openSupplierModal(id); }
+
+function deleteSupplier(id) {
+  if (!confirm('Delete this supplier?')) return;
+  DB.set('suppliers', DB.get('suppliers').filter(s => s.id !== id));
+  renderSuppliers();
+  toast('Supplier deleted');
+}
+
+// ==================== INVOICES ====================
+let invItemCount = 0;
+
+function openInvoiceModal(id = null) {
+  document.getElementById('invoiceEditId').value = id || '';
+  document.getElementById('invoiceModalTitle').textContent = id ? 'Edit Invoice' : 'Create Invoice';
+  document.getElementById('invoiceItems').innerHTML = '';
+  invItemCount = 0;
+  const s = getSettings();
+  document.getElementById('invTaxLabel').textContent = s.taxPercent ?? 5;
+
+  // populate customer datalist
+  const dl = document.getElementById('customerList');
+  dl.innerHTML = DB.get('customers').map(c => `<option value="${esc(c.name)}">`).join('');
+
+  if (id) {
+    const inv = DB.get('invoices').find(x => x.id === id);
+    if (inv) {
+      document.getElementById('invCustomerName').value = inv.customerName || '';
+      document.getElementById('invCustomerMobile').value = inv.customerMobile || '';
+      document.getElementById('invCustomerEmail').value = inv.customerEmail || '';
+      document.getElementById('invCustomerAddress').value = inv.customerAddress || '';
+      document.getElementById('invDate').value = inv.date || today();
+      document.getElementById('invStatus').value = inv.status || 'unpaid';
+      (inv.items || []).forEach(it => addInvoiceItemRow(it));
+    }
+  } else {
+    document.getElementById('invCustomerName').value = '';
+    document.getElementById('invCustomerMobile').value = '';
+    document.getElementById('invCustomerEmail').value = '';
+    document.getElementById('invCustomerAddress').value = '';
+    document.getElementById('invDate').value = today();
+    document.getElementById('invStatus').value = 'unpaid';
+    addInvoiceItemRow();
+  }
+  calcInvoiceTotals();
+  openModal('invoiceModal');
+}
+
+function addInvoiceItemRow(item = null) {
+  const idx = invItemCount++;
+  const products = DB.get('products');
+  const div = document.createElement('div');
+  div.className = 'invoice-item-row';
+  div.id = 'invRow' + idx;
+  div.innerHTML = `
+    <div class="form-group">
+      <label>Product</label>
+      <select onchange="onInvProductChange(${idx})" id="invProd${idx}">
+        <option value="">Select / type custom</option>
+        ${products.map(p => `<option value="${p.id}" data-price="${p.price}" data-name="${esc(p.name)}" ${item && item.productId === p.id ? 'selected' : ''}>${esc(p.name)} (Stock: ${p.stock})</option>`).join('')}
+        <option value="custom">-- Custom Item --</option>
+      </select>
+      <input type="text" id="invCustomName${idx}" placeholder="Custom product name" style="margin-top:0.3rem;display:${item && !item.productId ? 'block' : 'none'};" value="${item && !item.productId ? esc(item.name) : ''}">
+    </div>
+    <div class="form-group">
+      <label>Qty</label>
+      <input type="number" id="invQty${idx}" min="1" step="1" value="${item ? item.qty : 1}" oninput="calcInvoiceTotals()">
+    </div>
+    <div class="form-group">
+      <label>Price (AED)</label>
+      <input type="number" id="invPrice${idx}" min="0" step="0.01" value="${item ? item.price : ''}" oninput="calcInvoiceTotals()">
+    </div>
+    <div class="form-group">
+      <label>Line Total</label>
+      <input type="text" id="invLine${idx}" readonly value="0.00">
+    </div>
+    <button type="button" class="btn btn-danger btn-sm" onclick="removeInvRow(${idx})" style="margin-bottom:0.1rem;">✕</button>
+  `;
+  document.getElementById('invoiceItems').appendChild(div);
+  if (item && item.productId) {
+    document.getElementById('invPrice' + idx).value = item.price;
+  }
+  calcInvoiceTotals();
+}
+
+function onInvProductChange(idx) {
+  const sel = document.getElementById('invProd' + idx);
+  const customInput = document.getElementById('invCustomName' + idx);
+  if (sel.value === 'custom') {
+    customInput.style.display = 'block';
+    document.getElementById('invPrice' + idx).value = '';
+  } else if (sel.value) {
+    customInput.style.display = 'none';
+    const opt = sel.selectedOptions[0];
+    document.getElementById('invPrice' + idx).value = opt.dataset.price || 0;
+  } else {
+    customInput.style.display = 'none';
+  }
+  calcInvoiceTotals();
+}
+
+function removeInvRow(idx) {
+  const el = document.getElementById('invRow' + idx);
+  if (el) el.remove();
+  calcInvoiceTotals();
+}
+
+function calcInvoiceTotals() {
+  let subtotal = 0;
+  document.querySelectorAll('[id^="invRow"]').forEach(row => {
+    const idx = row.id.replace('invRow', '');
+    const qty = parseFloat(document.getElementById('invQty' + idx)?.value) || 0;
+    const price = parseFloat(document.getElementById('invPrice' + idx)?.value) || 0;
+    const line = qty * price;
+    const lineEl = document.getElementById('invLine' + idx);
+    if (lineEl) lineEl.value = line.toFixed(2);
+    subtotal += line;
+  });
+  const taxPct = getSettings().taxPercent ?? 5;
+  const tax = subtotal * (taxPct / 100);
+  const total = subtotal + tax;
+  document.getElementById('invSubtotal').textContent = formatMoney(subtotal);
+  document.getElementById('invTaxAmount').textContent = formatMoney(tax);
+  document.getElementById('invGrandTotal').textContent = formatMoney(total);
+  document.getElementById('invTaxLabel').textContent = taxPct;
+}
+
+function collectInvoiceItems() {
+  const items = [];
+  document.querySelectorAll('[id^="invRow"]').forEach(row => {
+    const idx = row.id.replace('invRow', '');
+    const sel = document.getElementById('invProd' + idx);
+    const qty = parseFloat(document.getElementById('invQty' + idx)?.value) || 0;
+    const price = parseFloat(document.getElementById('invPrice' + idx)?.value) || 0;
+    if (qty <= 0) return;
+    let name = '', productId = null;
+    if (sel.value === 'custom' || !sel.value) {
+      name = document.getElementById('invCustomName' + idx)?.value.trim() || 'Custom Item';
+    } else {
+      productId = sel.value;
+      name = sel.selectedOptions[0]?.dataset.name || '';
+    }
+    items.push({ productId, name, qty, price, lineTotal: qty * price });
+  });
+  return items;
+}
+
+function saveInvoice() {
+  const customerName = document.getElementById('invCustomerName').value.trim();
+  if (!customerName) { toast('Customer name required', 'error'); return; }
+  const items = collectInvoiceItems();
+  if (!items.length) { toast('Add at least one item', 'error'); return; }
+
+  const settings = getSettings();
+  const taxPct = settings.taxPercent ?? 5;
+  const subtotal = items.reduce((s, i) => s + i.lineTotal, 0);
+  const tax = subtotal * (taxPct / 100);
+  const total = subtotal + tax;
+
+  // Auto-add / update customer
+  ensureCustomer(
+    customerName,
+    document.getElementById('invCustomerMobile').value.trim(),
+    document.getElementById('invCustomerEmail').value.trim(),
+    document.getElementById('invCustomerAddress').value.trim()
+  );
+
+  // Stock deduction for products
+  let products = DB.get('products');
+  const editId = document.getElementById('invoiceEditId').value;
+  // If editing, restore previous stock first
+  if (editId) {
+    const oldInv = DB.get('invoices').find(x => x.id === editId);
+    if (oldInv) {
+      (oldInv.items || []).forEach(it => {
+        if (it.productId) {
+          const p = products.find(x => x.id === it.productId);
+          if (p) p.stock += it.qty;
+        }
+      });
+    }
+  }
+  // Deduct new quantities
+  for (const it of items) {
+    if (it.productId) {
+      const p = products.find(x => x.id === it.productId);
+      if (p) {
+        if (p.stock < it.qty) {
+          toast(`Insufficient stock for ${p.name} (have ${p.stock})`, 'error');
+          return;
+        }
+        p.stock -= it.qty;
+      }
+    }
+  }
+  DB.set('products', products);
+
+  let invoices = DB.get('invoices');
+  const inv = {
+    id: editId || uid(),
+    number: editId ? (invoices.find(x => x.id === editId)?.number || genInvoiceNo()) : genInvoiceNo(),
+    customerName,
+    customerMobile: document.getElementById('invCustomerMobile').value.trim(),
+    customerEmail: document.getElementById('invCustomerEmail').value.trim(),
+    customerAddress: document.getElementById('invCustomerAddress').value.trim(),
+    date: document.getElementById('invDate').value || today(),
+    status: document.getElementById('invStatus').value,
+    items,
+    subtotal,
+    tax,
+    taxPercent: taxPct,
+    total,
+    createdAt: editId ? (invoices.find(x => x.id === editId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+  };
+
+  if (editId) {
+    invoices = invoices.map(i => i.id === editId ? inv : i);
+  } else {
+    invoices.unshift(inv);
+  }
+  DB.set('invoices', invoices);
+  closeModal('invoiceModal');
+  renderInvoices();
+  renderDashboard();
+  toast('Invoice saved', 'success');
+}
+
+function genInvoiceNo() {
+  const invs = DB.get('invoices');
+  return 'INV-' + String(invs.length + 1).padStart(5, '0');
+}
+
+function renderInvoices() {
+  const list = DB.get('invoices');
+  const tbody = document.getElementById('invoicesTableBody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No invoices yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(inv => `
+    <tr>
+      <td><strong>${esc(inv.number)}</strong></td>
+      <td>${esc(inv.customerName)}</td>
+      <td>${esc(inv.date)}</td>
+      <td>${formatMoney(inv.subtotal)}</td>
+      <td>${formatMoney(inv.tax)}</td>
+      <td><strong>${formatMoney(inv.total)}</strong></td>
+      <td><span class="badge ${inv.status === 'paid' ? 'badge-success' : inv.status === 'partial' ? 'badge-warning' : 'badge-danger'}">${inv.status}</span></td>
+      <td>
+        <button class="btn btn-secondary btn-sm" onclick="viewInvoice('${inv.id}')">View</button>
+        <button class="btn btn-secondary btn-sm" onclick="openInvoiceModal('${inv.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteInvoice('${inv.id}')">Del</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function deleteInvoice(id) {
+  if (!confirm('Delete this invoice? Stock will be restored.')) return;
+  const inv = DB.get('invoices').find(x => x.id === id);
+  if (inv) {
+    let products = DB.get('products');
+    (inv.items || []).forEach(it => {
+      if (it.productId) {
+        const p = products.find(x => x.id === it.productId);
+        if (p) p.stock += it.qty;
+      }
+    });
+    DB.set('products', products);
+  }
+  DB.set('invoices', DB.get('invoices').filter(i => i.id !== id));
+  renderInvoices();
+  renderDashboard();
+  toast('Invoice deleted');
+}
+
+
+function printInvoice() {
+  const content = document.getElementById('invoicePreviewContent').innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Invoice</title><style>body{font-family:Segoe UI,sans-serif;padding:2rem;color:#0f172a;} table{width:100%;border-collapse:collapse;} .badge{display:inline-block;padding:0.2rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;} .badge-success{background:#d1fae5;color:#065f46;} .badge-danger{background:#fee2e2;color:#991b1b;}</style></head><body>${content}</body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 300);
+}
+
+// Current invoice being viewed (for share)
+let _currentViewInvoice = null;
+
+function viewInvoice(id) {
+  const inv = DB.get('invoices').find(x => x.id === id);
+  if (!inv) return;
+  _currentViewInvoice = inv;
+  const s = getSettings();
+  const logoHtml = s.logo ? `<img src="${s.logo}" style="max-height:70px;max-width:140px;object-fit:contain;">` : '';
+  const html = `
+    <div id="invoicePdfSource" style="font-family:inherit;color:#0f172a;padding:0.5rem;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;border-bottom:2px solid #0f766e;padding-bottom:1rem;">
+        <div>
+          ${logoHtml}
+          <h2 style="margin:0.4rem 0 0.2rem;font-size:1.4rem;">${esc(s.companyName)}</h2>
+          <div style="font-size:0.85rem;color:#64748b;line-height:1.5;">
+            ${esc(s.address)}<br>
+            Mobile: ${esc(s.mobile)} · Email: ${esc(s.email)}<br>
+            TRN: ${esc(s.taxNumber)} · Licence: ${esc(s.licenceNumber)}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <h1 style="margin:0;color:#0f766e;font-size:1.6rem;">INVOICE</h1>
+          <div style="font-size:0.95rem;margin-top:0.4rem;"><strong>${esc(inv.number)}</strong></div>
+          <div style="font-size:0.85rem;color:#64748b;">Date: ${esc(inv.date)}</div>
+          <div style="margin-top:0.4rem;"><span class="badge ${inv.status === 'paid' ? 'badge-success' : 'badge-danger'}">${inv.status.toUpperCase()}</span></div>
+        </div>
+      </div>
+      <div style="margin-bottom:1.25rem;">
+        <strong style="color:#64748b;font-size:0.8rem;">BILL TO</strong>
+        <div style="font-size:1rem;font-weight:600;">${esc(inv.customerName)}</div>
+        <div style="font-size:0.85rem;color:#64748b;">
+          ${inv.customerMobile ? 'Mobile: ' + esc(inv.customerMobile) + '<br>' : ''}
+          ${inv.customerEmail ? 'Email: ' + esc(inv.customerEmail) + '<br>' : ''}
+          ${inv.customerAddress ? esc(inv.customerAddress) : ''}
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+        <thead>
+          <tr style="background:#f1f5f9;">
+            <th style="padding:0.65rem;text-align:left;border-bottom:1px solid #e2e8f0;">#</th>
+            <th style="padding:0.65rem;text-align:left;border-bottom:1px solid #e2e8f0;">Item</th>
+            <th style="padding:0.65rem;text-align:right;border-bottom:1px solid #e2e8f0;">Qty</th>
+            <th style="padding:0.65rem;text-align:right;border-bottom:1px solid #e2e8f0;">Price</th>
+            <th style="padding:0.65rem;text-align:right;border-bottom:1px solid #e2e8f0;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(inv.items || []).map((it, i) => `
+            <tr>
+              <td style="padding:0.6rem;border-bottom:1px solid #e2e8f0;">${i + 1}</td>
+              <td style="padding:0.6rem;border-bottom:1px solid #e2e8f0;">${esc(it.name)}</td>
+              <td style="padding:0.6rem;text-align:right;border-bottom:1px solid #e2e8f0;">${it.qty}</td>
+              <td style="padding:0.6rem;text-align:right;border-bottom:1px solid #e2e8f0;">${formatMoney(it.price)}</td>
+              <td style="padding:0.6rem;text-align:right;border-bottom:1px solid #e2e8f0;">${formatMoney(it.lineTotal)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:1.25rem;text-align:right;font-size:0.95rem;">
+        <div>Subtotal: <strong>${formatMoney(inv.subtotal)}</strong></div>
+        <div>Tax (${inv.taxPercent || 5}%): <strong>${formatMoney(inv.tax)}</strong></div>
+        <div style="font-size:1.25rem;font-weight:700;color:#0f766e;margin-top:0.4rem;">Grand Total: ${formatMoney(inv.total)}</div>
+      </div>
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid #e2e8f0;font-size:0.8rem;color:#94a3b8;text-align:center;">
+        Thank you for your business · All amounts in AED
+      </div>
+    </div>
+  `;
+  document.getElementById('invoicePreviewContent').innerHTML = html;
+  openModal('viewInvoiceModal');
+}
+
+async function generateInvoicePDF() {
+  const element = document.getElementById('invoicePdfSource');
+  if (!element) {
+    toast('Invoice content not found', 'error');
+    return null;
+  }
+  const inv = _currentViewInvoice;
+  const filename = (inv ? inv.number : 'Invoice') + '.pdf';
+
+  const opt = {
+    margin:       [10, 10, 10, 10],
+    filename:     filename,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true, logging: false },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  try {
+    const worker = html2pdf().set(opt).from(element);
+    const pdfBlob = await worker.outputPdf('blob');
+    return { blob: pdfBlob, filename };
+  } catch (err) {
+    console.error(err);
+    toast('Failed to generate PDF', 'error');
+    return null;
+  }
+}
+
+async function downloadInvoicePDF() {
+  toast('Generating PDF...');
+  const result = await generateInvoicePDF();
+  if (!result) return;
+
+  const url = URL.createObjectURL(result.blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = result.filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('PDF downloaded', 'success');
+}
+
+async function shareInvoiceWhatsApp() {
+  const inv = _currentViewInvoice;
+  if (!inv) {
+    toast('No invoice selected', 'error');
+    return;
+  }
+
+  toast('Generating PDF for WhatsApp...');
+  const result = await generateInvoicePDF();
+  if (!result) return;
+
+  // Download the PDF so user can attach it
+  const url = URL.createObjectURL(result.blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = result.filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+  // Build WhatsApp message
+  const s = getSettings();
+  const phone = (inv.customerMobile || '').replace(/\D/g, '');
+  let msg = `*Invoice ${inv.number}*\n`;
+  msg += `From: ${s.companyName || 'Company'}\n`;
+  msg += `Date: ${inv.date}\n`;
+  msg += `Customer: ${inv.customerName}\n`;
+  msg += `────────────────\n`;
+  (inv.items || []).forEach(it => {
+    msg += `• ${it.name} x${it.qty} = ${formatMoney(it.lineTotal)}\n`;
+  });
+  msg += `────────────────\n`;
+  msg += `Subtotal: ${formatMoney(inv.subtotal)}\n`;
+  msg += `Tax (${inv.taxPercent || 5}%): ${formatMoney(inv.tax)}\n`;
+  msg += `*Grand Total: ${formatMoney(inv.total)}*\n\n`;
+  msg += `Status: ${inv.status.toUpperCase()}\n`;
+  msg += `\n📄 PDF invoice has been downloaded. Please attach the file "${result.filename}" to this chat.`;
+
+  const encoded = encodeURIComponent(msg);
+  // If customer has mobile, open chat with them; otherwise open WhatsApp general
+  let waUrl;
+  if (phone && phone.length >= 8) {
+    // Assume UAE if starts with 0 or short, add country code if needed
+    let fullPhone = phone;
+    if (phone.startsWith('0')) fullPhone = '971' + phone.slice(1);
+    else if (!phone.startsWith('971') && phone.length <= 10) fullPhone = '971' + phone;
+    waUrl = `https://wa.me/${fullPhone}?text=${encoded}`;
+  } else {
+    waUrl = `https://wa.me/?text=${encoded}`;
+  }
+
+  window.open(waUrl, '_blank');
+  toast('PDF downloaded · WhatsApp opened — attach the PDF file', 'success');
+}
+
+// ==================== PURCHASES ====================
+let purItemCount = 0;
+
+function openPurchaseModal() {
+  document.getElementById('purchaseItems').innerHTML = '';
+  purItemCount = 0;
+  document.getElementById('purDate').value = today();
+  document.getElementById('purStatus').value = 'unpaid';
+  // populate suppliers
+  const sel = document.getElementById('purSupplier');
+  sel.innerHTML = '<option value="">Select supplier</option>' +
+    DB.get('suppliers').map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  addPurchaseItemRow();
+  calcPurchaseTotal();
+  openModal('purchaseModal');
+}
+
+function addPurchaseItemRow(item = null) {
+  const idx = purItemCount++;
+  const products = DB.get('products');
+  const div = document.createElement('div');
+  div.className = 'invoice-item-row';
+  div.id = 'purRow' + idx;
+  div.innerHTML = `
+    <div class="form-group">
+      <label>Product</label>
+      <select id="purProd${idx}" onchange="onPurProductChange(${idx})">
+        <option value="">Select product</option>
+        ${products.map(p => `<option value="${p.id}" data-cost="${p.cost}" data-name="${esc(p.name)}">${esc(p.name)}</option>`).join('')}
+        <option value="new">-- Create New Product --</option>
+      </select>
+      <input type="text" id="purNewName${idx}" placeholder="New product name" style="margin-top:0.3rem;display:none;">
+    </div>
+    <div class="form-group">
+      <label>Qty</label>
+      <input type="number" id="purQty${idx}" min="1" step="1" value="1" oninput="calcPurchaseTotal()">
+    </div>
+    <div class="form-group">
+      <label>Cost (AED)</label>
+      <input type="number" id="purCost${idx}" min="0" step="0.01" value="" oninput="calcPurchaseTotal()">
+    </div>
+    <div class="form-group">
+      <label>Line Total</label>
+      <input type="text" id="purLine${idx}" readonly value="0.00">
+    </div>
+    <button type="button" class="btn btn-danger btn-sm" onclick="removePurRow(${idx})" style="margin-bottom:0.1rem;">✕</button>
+  `;
+  document.getElementById('purchaseItems').appendChild(div);
+}
+
+function onPurProductChange(idx) {
+  const sel = document.getElementById('purProd' + idx);
+  const newName = document.getElementById('purNewName' + idx);
+  if (sel.value === 'new') {
+    newName.style.display = 'block';
+    document.getElementById('purCost' + idx).value = '';
+  } else if (sel.value) {
+    newName.style.display = 'none';
+    document.getElementById('purCost' + idx).value = sel.selectedOptions[0].dataset.cost || 0;
+  } else {
+    newName.style.display = 'none';
+  }
+  calcPurchaseTotal();
+}
+
+function removePurRow(idx) {
+  const el = document.getElementById('purRow' + idx);
+  if (el) el.remove();
+  calcPurchaseTotal();
+}
+
+function calcPurchaseTotal() {
+  let total = 0;
+  document.querySelectorAll('[id^="purRow"]').forEach(row => {
+    const idx = row.id.replace('purRow', '');
+    const qty = parseFloat(document.getElementById('purQty' + idx)?.value) || 0;
+    const cost = parseFloat(document.getElementById('purCost' + idx)?.value) || 0;
+    const line = qty * cost;
+    const lineEl = document.getElementById('purLine' + idx);
+    if (lineEl) lineEl.value = line.toFixed(2);
+    total += line;
+  });
+  document.getElementById('purTotal').textContent = formatMoney(total);
+}
+
+function savePurchase() {
+  const supplierId = document.getElementById('purSupplier').value;
+  if (!supplierId) { toast('Select a supplier', 'error'); return; }
+  const supplier = DB.get('suppliers').find(s => s.id === supplierId);
+  if (!supplier) { toast('Invalid supplier', 'error'); return; }
+
+  const items = [];
+  let products = DB.get('products');
+  let ok = true;
+
+  document.querySelectorAll('[id^="purRow"]').forEach(row => {
+    const idx = row.id.replace('purRow', '');
+    const sel = document.getElementById('purProd' + idx);
+    const qty = parseInt(document.getElementById('purQty' + idx)?.value) || 0;
+    const cost = parseFloat(document.getElementById('purCost' + idx)?.value) || 0;
+    if (qty <= 0) return;
+
+    let productId = sel.value;
+    let name = '';
+
+    if (productId === 'new') {
+      name = document.getElementById('purNewName' + idx)?.value.trim();
+      if (!name) { toast('Enter name for new product', 'error'); ok = false; return; }
+      const newProd = {
+        id: uid(),
+        name,
+        sku: '',
+        cost,
+        price: cost * 1.3, // default markup
+        stock: qty
+      };
+      products.push(newProd);
+      productId = newProd.id;
+      name = newProd.name;
+    } else if (productId) {
+      const p = products.find(x => x.id === productId);
+      if (p) {
+        p.stock += qty;
+        p.cost = cost; // update last cost
+        name = p.name;
+      }
+    } else {
+      return;
+    }
+    items.push({ productId, name, qty, cost, lineTotal: qty * cost });
+  });
+
+  if (!ok || !items.length) { toast('Add at least one valid item', 'error'); return; }
+
+  DB.set('products', products);
+
+  const total = items.reduce((s, i) => s + i.lineTotal, 0);
+  const purchases = DB.get('purchases');
+  const pur = {
+    id: uid(),
+    number: 'PUR-' + String(purchases.length + 1).padStart(5, '0'),
+    supplierId,
+    supplierName: supplier.name,
+    date: document.getElementById('purDate').value || today(),
+    status: document.getElementById('purStatus').value,
+    items,
+    total,
+    createdAt: new Date().toISOString()
+  };
+  purchases.unshift(pur);
+  DB.set('purchases', purchases);
+  closeModal('purchaseModal');
+  renderPurchases();
+  renderProducts();
+  renderDashboard();
+  toast('Purchase saved & stock updated', 'success');
+}
+
+function renderPurchases() {
+  const list = DB.get('purchases');
+  const tbody = document.getElementById('purchasesTableBody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No purchases yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(p => `
+    <tr>
+      <td><strong>${esc(p.number)}</strong></td>
+      <td>${esc(p.supplierName)}</td>
+      <td>${esc(p.date)}</td>
+      <td>${formatMoney(p.total)}</td>
+      <td><span class="badge ${p.status === 'paid' ? 'badge-success' : 'badge-warning'}">${p.status}</span></td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="deletePurchase('${p.id}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function deletePurchase(id) {
+  if (!confirm('Delete this purchase? Stock will be reduced.')) return;
+  const pur = DB.get('purchases').find(x => x.id === id);
+  if (pur) {
+    let products = DB.get('products');
+    (pur.items || []).forEach(it => {
+      if (it.productId) {
+        const p = products.find(x => x.id === it.productId);
+        if (p) p.stock = Math.max(0, p.stock - it.qty);
+      }
+    });
+    DB.set('products', products);
+  }
+  DB.set('purchases', DB.get('purchases').filter(p => p.id !== id));
+  renderPurchases();
+  renderProducts();
+  renderDashboard();
+  toast('Purchase deleted');
+}
+
+// ==================== EXPENSES ====================
+function renderExpenses() {
+  const list = DB.get('expenses');
+  const tbody = document.getElementById('expensesTableBody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No expenses recorded.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(e => `
+    <tr>
+      <td>${esc(e.date)}</td>
+      <td><span class="badge badge-info">${esc(e.category)}</span></td>
+      <td>${esc(e.description || '-')}</td>
+      <td>${formatMoney(e.amount)}</td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openExpenseModal() {
+  document.getElementById('expDate').value = today();
+  document.getElementById('expCategory').value = 'Fuel';
+  document.getElementById('expAmount').value = '';
+  document.getElementById('expDesc').value = '';
+  openModal('expenseModal');
+}
+
+function saveExpense() {
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  if (isNaN(amount) || amount <= 0) { toast('Valid amount required', 'error'); return; }
+  const list = DB.get('expenses');
+  list.unshift({
+    id: uid(),
+    date: document.getElementById('expDate').value || today(),
+    category: document.getElementById('expCategory').value,
+    amount,
+    description: document.getElementById('expDesc').value.trim()
+  });
+  DB.set('expenses', list);
+  closeModal('expenseModal');
+  renderExpenses();
+  renderDashboard();
+  toast('Expense added', 'success');
+}
+
+function deleteExpense(id) {
+  if (!confirm('Delete this expense?')) return;
+  DB.set('expenses', DB.get('expenses').filter(e => e.id !== id));
+  renderExpenses();
+  renderDashboard();
+  toast('Expense deleted');
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+  const invoices = DB.get('invoices');
+  const purchases = DB.get('purchases');
+  const expenses = DB.get('expenses');
+  const products = DB.get('products');
+
+  // Totals
+  const totalSales = invoices.reduce((s, i) => s + (i.total || 0), 0);
+  const receivables = invoices.filter(i => i.status !== 'paid').reduce((s, i) => s + (i.total || 0), 0);
+  const payables = purchases.filter(p => p.status !== 'paid').reduce((s, p) => s + (p.total || 0), 0);
+  const totalExp = expenses.reduce((s, e) => s + (e.amount || 0), 0);
+
+  document.getElementById('statTotalSales').textContent = formatMoney(totalSales);
+  document.getElementById('statReceivables').textContent = formatMoney(receivables);
+  document.getElementById('statPayables').textContent = formatMoney(payables);
+  document.getElementById('statExpenses').textContent = formatMoney(totalExp);
+
+  // Period sales
+  const now = new Date();
+  const todayStr = today();
+  const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const todaySales = invoices.filter(i => i.date === todayStr).reduce((s, i) => s + i.total, 0);
+  const weekSales = invoices.filter(i => new Date(i.date) >= weekAgo).reduce((s, i) => s + i.total, 0);
+  const monthSales = invoices.filter(i => new Date(i.date) >= monthStart).reduce((s, i) => s + i.total, 0);
+
+  document.getElementById('statTodaySales').textContent = formatMoney(todaySales);
+  document.getElementById('statWeekSales').textContent = formatMoney(weekSales);
+  document.getElementById('statMonthSales').textContent = formatMoney(monthSales);
+
+  // Best / Least selling
+  const soldMap = {};
+  invoices.forEach(inv => {
+    (inv.items || []).forEach(it => {
+      const key = it.productId || it.name;
+      if (!soldMap[key]) soldMap[key] = { name: it.name, qty: 0, revenue: 0, productId: it.productId };
+      soldMap[key].qty += it.qty;
+      soldMap[key].revenue += it.lineTotal;
+    });
+  });
+  const soldArr = Object.values(soldMap).sort((a, b) => b.qty - a.qty);
+
+  const bestBody = document.getElementById('bestSellingBody');
+  if (soldArr.length) {
+    bestBody.innerHTML = soldArr.slice(0, 5).map(p => `
+      <tr>
+        <td>${esc(p.name)}</td>
+        <td>${p.qty}</td>
+        <td>${formatMoney(p.revenue)}</td>
+      </tr>
+    `).join('');
+  } else {
+    bestBody.innerHTML = '<tr><td colspan="3" class="empty-state">No sales yet</td></tr>';
+  }
+
+  // Least selling = products with low or zero sales
+  const leastBody = document.getElementById('leastSellingBody');
+  const productSales = products.map(p => {
+    const sold = soldMap[p.id] || { qty: 0 };
+    return { name: p.name, qty: sold.qty, stock: p.stock };
+  }).sort((a, b) => a.qty - b.qty);
+
+  if (productSales.length) {
+    leastBody.innerHTML = productSales.slice(0, 5).map(p => `
+      <tr>
+        <td>${esc(p.name)}</td>
+        <td>${p.qty}</td>
+        <td>${p.stock}</td>
+      </tr>
+    `).join('');
+  } else {
+    leastBody.innerHTML = '<tr><td colspan="3" class="empty-state">No products</td></tr>';
+  }
+
+  // Recent invoices
+  const recentBody = document.getElementById('dashRecentInvoices');
+  if (invoices.length) {
+    recentBody.innerHTML = invoices.slice(0, 6).map(inv => `
+      <tr>
+        <td><strong>${esc(inv.number)}</strong></td>
+        <td>${esc(inv.customerName)}</td>
+        <td>${esc(inv.date)}</td>
+        <td>${formatMoney(inv.total)}</td>
+        <td><span class="badge ${inv.status === 'paid' ? 'badge-success' : inv.status === 'partial' ? 'badge-warning' : 'badge-danger'}">${inv.status}</span></td>
+      </tr>
+    `).join('');
+  } else {
+    recentBody.innerHTML = '<tr><td colspan="5" class="empty-state">No invoices yet</td></tr>';
+  }
+}
+
+// ==================== HELPERS ====================
+function openModal(id) {
+  document.getElementById(id).classList.add('show');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => {
+    if (e.target === ov) ov.classList.remove('show');
+  });
+});
+
+// Init
+(function initApp() {
+  // Enter key on login
+  document.getElementById('loginPassword')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginUsername')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  if (isLoggedIn()) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    applyUserUI();
+    updateSidebar();
+    renderDashboard();
+  } else {
+    // ensure auth defaults exist
+    getAuth();
+    document.getElementById('loginScreen').classList.remove('hidden');
+  }
+})();
+</script>
+</body>
+</html>
